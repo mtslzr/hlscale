@@ -1,0 +1,45 @@
+openapi: 3.0.3
+
+info:
+  title: HLScale API
+  version: 2020-12-26
+
+paths:
+  /exams:
+    post:
+      summary: Creates a new exam.
+      parameters:
+        - in: body
+          name: newExam
+          required: true
+          schema:
+            $ref: "#/definitions/newExam"
+      responses:
+        200:
+          description: Successful creation
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:645714156459:function:hlscale/invocations"
+        contentHandling: "CONVERT_TO_TEXT"
+        passthroughBehavior: "WHEN_NO_MATCH"
+        type: "aws_proxy"
+        responses:
+          "default":
+            statusCode: "200"
+          "ERROR.*":
+            statusCode: "500"
+
+definitions:
+  newExam:
+    type: object
+    properties:
+      name:
+        type: string
+      start:
+        type: integer
+      end:
+        type: integer
+      students:
+        type: integer
+
+  successResponse:

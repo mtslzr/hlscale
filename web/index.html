@@ -24,15 +24,21 @@
             <button type="submit">Submit</button>
         </div>
     </form>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script type="text/javascript">
         function addExam() {
+            const axios = window.axios;
             const formData = {
-                "name": document.getElementById("name").value,
-                "start": document.getElementById("start").value,
-                "end": document.getElementById("end").value,
-                "students": document.getElementById("students").value
+                "function": "createExam",
+                "exam": {
+                    "name": document.getElementById("name").value,
+                    "start": document.getElementById("start").value,
+                    "end": document.getElementById("end").value,
+                    "students": document.getElementById("students").value
+                }
             }
-            console.log(formData);
+            const url = "https://w65yfftrcg.execute-api.us-east-1.amazonaws.com/api/exams"
+            axios.post(url, formData);
         }
     </script>
 </body>

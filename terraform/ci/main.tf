@@ -40,6 +40,7 @@ resource "aws_iam_policy" "ci-role" {
     {
       "Effect": "Allow",
       "Action": [
+        "apigateway:*",
         "autoscaling:*",
         "cloudwatch:*",
         "dynamodb:*",
