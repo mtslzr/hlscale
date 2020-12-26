@@ -1,8 +1,39 @@
 <html>
 <head>
-
+    <title>Schedule an Exam</title>
 </head>
 <body>
-
+    <form id="exam" onsubmit="event.preventDefault(); return addExam()">
+        <div class="form_block">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" />
+        </div>
+        <div class="form_block">
+            <label for="start">Start</label>
+            <input id="start" name="start" type="text" />
+        </div>
+        <div class="form_block">
+            <label for="end">End</label>
+            <input id="end" name="end" type="text" />
+        </div>
+        <div class="form_block">
+            <label for="students">No. of Students</label>
+            <input id="students" name="students" type="text" />
+        </div>
+        <div class="form_block">
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+    <script type="text/javascript">
+        function addExam() {
+            const formData = {
+                "name": document.getElementById("name").value,
+                "start": document.getElementById("start").value,
+                "end": document.getElementById("end").value,
+                "students": document.getElementById("students").value
+            }
+            console.log(formData);
+        }
+    </script>
 </body>
 </html>

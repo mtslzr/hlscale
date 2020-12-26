@@ -8,8 +8,12 @@ terraform {
   }
 }
 
+locals {
+  project_name = "hlscale"
+}
+
 resource "aws_iam_role" "ci-role" {
-  name               = "hlscale-ci"
+  name               = "${local.project_name}-ci"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -28,7 +32,7 @@ EOF
 }
 
 resource "aws_iam_policy" "ci-role" {
-  name   = "hlscale-ci"
+  name   = "${local.project_name}-ci"
   policy = <<EOF
 {
   "Version": "2012-10-17",

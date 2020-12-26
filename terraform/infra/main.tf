@@ -8,14 +8,19 @@ terraform {
   }
 }
 
+locals {
+  home_ip      = "172.97.40.128"
+  project_name = "hlscale"
+}
+
 resource "aws_launch_configuration" "launch" {
-  name          = "hlscale-lc"
+  name          = "${local.project_name}-lc"
   image_id      = "ami-0885b1f6bd170450c"
   instance_type = "t2.micro"
 }
 
 resource "aws_autoscaling_group" "scale" {
-  name             = "hlscale-asg"
+  name             = "${local.project_name}-asg"
   desired_capacity = 1
   min_size         = 1
   max_size         = 5
@@ -25,19 +30,27 @@ resource "aws_autoscaling_group" "scale" {
 }
 
 resource "aws_s3_bucket" "website" {
-  bucket = "hlscale-web"
-  acl = "public-read"
+  bucket = "${local.project_name}-web"
+  acl    = "public-read"
   policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
     {
       "Action": [
-        "s3:GetObject"
+        "s3:*"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:s3:::hlscale-web/*",
-      "Principal": "*"
+      "Resource": [
+        "arn:aws:s3:::hlscale-web",
+        "arn:aws:s3:::hlscale-web/*"
+      ],
+      "Principal": "*",
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": "${local.home_ip}/32"
+        }
+      }
     }
   ]
 }
