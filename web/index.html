@@ -25,21 +25,6 @@
         </div>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script type="text/javascript">
-        function addExam() {
-            const axios = window.axios;
-            const formData = {
-                "function": "createExam",
-                "exam": {
-                    "name": document.getElementById("name").value,
-                    "start": document.getElementById("start").value,
-                    "end": document.getElementById("end").value,
-                    "students": document.getElementById("students").value
-                }
-            }
-            const url = "https://w65yfftrcg.execute-api.us-east-1.amazonaws.com/api/exams"
-            axios.post(url, formData);
-        }
-    </script>
+    <script src="scripts.js"></script>
 </body>
 </html>

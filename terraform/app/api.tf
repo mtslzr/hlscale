@@ -21,7 +21,7 @@ resource "aws_api_gateway_deployment" "api" {
 
 resource "aws_lambda_permission" "api" {
   action        = "lambda:InvokeFunction"
-  function_name = local.project_name
+  function_name = module.lambda.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*/*"
 }
