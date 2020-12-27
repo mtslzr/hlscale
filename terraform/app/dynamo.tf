@@ -11,8 +11,10 @@ module "dynamo" {
 }
 
 resource "aws_lambda_event_source_mapping" "dynamo" {
-  depends_on = [module.lambda]
-  event_source_arn  = module.dynamo.stream_arn
-  function_name     = module.lambda.function_name
-  starting_position = "LATEST"
+  depends_on             = [module.lambda]
+  event_source_arn       = module.dynamo.stream_arn
+  function_name          = module.lambda.function_name
+
+  maximum_retry_attempts = 0
+  starting_position      = "LATEST"
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/mtslzr/hlscale/pkg/cwevents"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/mtslzr/hlscale/pkg/constants"
@@ -13,34 +14,37 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Event is the data passed to the Lambda.
-type Event struct {
-	Body    string   `json:"body"`
-	Records []Record `json:"Records"`
-}
-
 // Body is the POST data passed during API calls.
 type Body struct {
-	Exam     exams.Exam `json:"exam"`
-	Function string     `json:"function"`
+	Event    cwevents.Event `json:"event"`
+	Exam     exams.Exam     `json:"exam"`
+	Function string         `json:"function"`
 }
 
-// Record is the data passed from Dynamo stream triggers.
-type Record struct {
-	Change struct {
-		NewImage map[string]*dynamodb.AttributeValue `json:"NewImage"`
-	} `json:"dynamodb"`
+// Event is the data passed to the Lambda.
+type Event struct {
+	Body    string `json:"body"`
+	Records []struct {
+		Change struct {
+			NewImage map[string]*dynamodb.AttributeValue `json:"NewImage"`
+		} `json:"dynamodb"`
+	} `json:"Records"`
 }
 
+// Handler is the context for executing Lambda functions.
 type Handler struct {
 	Context context.Context
 }
 
+// Handle is a pseudo-router to set up the function to run.
 func (h Handler) Handle(ctx context.Context, event Event) (events.APIGatewayProxyResponse, error) {
 	if len(event.Records) > 0 {
-		fmt.Printf("change -> %+v\n", event.Records[0].Change)
 		log.Infof("Running %s...", constants.CreateEvent)
-		return sendResponse(nil)
+		record, err := cwevents.ParseRecord(event.Records[0].Change.NewImage)
+		if err != nil {
+			return sendResponse(err)
+		}
+		return sendResponse(cwevents.CreateEvents(record))
 	} else {
 		var body Body
 		err := json.Unmarshal([]byte(event.Body), &body)
@@ -54,6 +58,7 @@ func (h Handler) Handle(ctx context.Context, event Event) (events.APIGatewayProx
 			return sendResponse(exams.CreateExam(body.Exam))
 		case constants.StartScale:
 			log.Infof("Running %s...", constants.StartScale)
+			fmt.Printf("%+v\n", event.Body)
 		case constants.EndScale:
 			log.Infof("Running %s...", constants.EndScale)
 		}
