@@ -21,6 +21,10 @@ type Event struct {
 }
 
 type EventInput struct {
+	Body string `json:"body"`
+}
+
+type EventInputBody struct {
 	Event    Event  `json:"event"`
 	Function string `json:"function"`
 }
@@ -66,17 +70,16 @@ func CreateEvents(record Record) error {
 		return err
 	}
 
-	startInput, err := json.Marshal(EventInput{
-		Event:    Event{
+	startBody, _ := json.Marshal(EventInputBody{
+		Event: Event{
 			RuleArn:  *startResp.RuleArn,
 			Students: record.Students,
 		},
 		Function: constants.StartScale,
 	})
-	if err != nil {
-		log.Errorf("Error creating event input: %s", err)
-		return err
-	}
+	startInput, _ := json.Marshal(EventInput{
+		Body: string(startBody),
+	})
 
 	startTarget := putTarget(startName, startInput)
 	_, err = svc.PutTargets(&startTarget)
@@ -93,11 +96,14 @@ func CreateEvents(record Record) error {
 		return err
 	}
 
-	endInput, err := json.Marshal(EventInput{
-		Event:    Event{
-			RuleArn:  *endResp.RuleArn,
+	endBody, _ := json.Marshal(EventInputBody{
+		Event: Event{
+			RuleArn: *endResp.RuleArn,
 		},
 		Function: constants.EndScale,
+	})
+	endInput, err := json.Marshal(EventInput{
+		Body: string(endBody),
 	})
 	if err != nil {
 		log.Errorf("Error creating event input: %s", err)

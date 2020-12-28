@@ -18,10 +18,3 @@ resource "aws_api_gateway_deployment" "api" {
     create_before_destroy = true
   }
 }
-
-resource "aws_lambda_permission" "api" {
-  action        = "lambda:InvokeFunction"
-  function_name = module.lambda.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*/*"
-}

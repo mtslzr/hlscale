@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/mtslzr/hlscale/pkg/cwevents"
 
@@ -58,7 +57,6 @@ func (h Handler) Handle(ctx context.Context, event Event) (events.APIGatewayProx
 			return sendResponse(exams.CreateExam(body.Exam))
 		case constants.StartScale:
 			log.Infof("Running %s...", constants.StartScale)
-			fmt.Printf("%+v\n", event.Body)
 		case constants.EndScale:
 			log.Infof("Running %s...", constants.EndScale)
 		}
