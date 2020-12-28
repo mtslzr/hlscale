@@ -16,7 +16,7 @@ import (
 )
 
 type Event struct {
-	RuleArn  string `json:"rule_arn"`
+	Name     string `json:"name"`
 	Students int    `json:"students"`
 }
 
@@ -64,7 +64,7 @@ func CreateEvents(record Record) error {
 
 	startName := fmt.Sprintf("Scale-Up-%s", shortName)
 	startRule := putRule(startName, record.Start)
-	startResp, err := svc.PutRule(&startRule)
+	_, err = svc.PutRule(&startRule)
 	if err != nil {
 		log.Errorf("Error creating rule: %s", err)
 		return err
@@ -72,7 +72,7 @@ func CreateEvents(record Record) error {
 
 	startBody, _ := json.Marshal(EventInputBody{
 		Event: Event{
-			RuleArn:  *startResp.RuleArn,
+			Name:     startName,
 			Students: record.Students,
 		},
 		Function: constants.StartScale,
@@ -90,7 +90,7 @@ func CreateEvents(record Record) error {
 
 	endName := fmt.Sprintf("Scale-Down-%s", shortName)
 	endRule := putRule(endName, record.End)
-	endResp, err := svc.PutRule(&endRule)
+	_, err = svc.PutRule(&endRule)
 	if err != nil {
 		log.Errorf("Error creating rule: %s", err)
 		return err
@@ -98,7 +98,7 @@ func CreateEvents(record Record) error {
 
 	endBody, _ := json.Marshal(EventInputBody{
 		Event: Event{
-			RuleArn: *endResp.RuleArn,
+			Name: endName,
 		},
 		Function: constants.EndScale,
 	})
@@ -134,11 +134,40 @@ func putTarget(name string, input []byte) cloudwatchevents.PutTargetsInput {
 		Targets: []*cloudwatchevents.Target{
 			{
 				Arn:   aws.String(constants.EventsLambdaArn),
-				Id:    aws.String(strings.ReplaceAll(name, "-", "")),
+				Id:    aws.String(name),
 				Input: aws.String(string(input)),
 			},
 		},
 	}
+}
+
+// DeleteRule deletes a CLoudWatch Event after it runs.
+func DeleteRule(name string) error {
+	sess, err := session.NewSession()
+	if err != nil {
+		log.Errorf("Error creating AWS session: %s", err)
+		return err
+	}
+
+	svc := cloudwatchevents.New(sess)
+	_, err = svc.RemoveTargets(&cloudwatchevents.RemoveTargetsInput{EventBusName: nil,
+		Force: aws.Bool(true),
+		Ids: []*string{
+			aws.String(name),
+		},
+		Rule: aws.String(name),
+	})
+	if err != nil {
+		log.Errorf("Error removing targets from rule: %s", err)
+		return err
+	}
+
+	_, err = svc.DeleteRule(&cloudwatchevents.DeleteRuleInput{
+		Force: aws.Bool(true),
+		Name:  aws.String(name),
+	})
+
+	return err
 }
 
 func unixToCron(ts string) string {

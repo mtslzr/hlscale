@@ -13,4 +13,7 @@ const (
 	CreateExam  = "createExam"
 	EndScale    = "endScale"
 	StartScale  = "startScale"
+
+	// Scale
+	ScaleGroupName = "hlscale-asg"
 )

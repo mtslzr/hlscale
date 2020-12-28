@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/mtslzr/hlscale/pkg/cwevents"
+	"github.com/mtslzr/hlscale/pkg/scale"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/mtslzr/hlscale/pkg/constants"
@@ -57,8 +58,17 @@ func (h Handler) Handle(ctx context.Context, event Event) (events.APIGatewayProx
 			return sendResponse(exams.CreateExam(body.Exam))
 		case constants.StartScale:
 			log.Infof("Running %s...", constants.StartScale)
+			if err = scale.UpdateCapacity(body.Event.Students); err != nil {
+				return sendResponse(err)
+			}
+			return sendResponse(cwevents.DeleteRule(body.Event.Name))
 		case constants.EndScale:
 			log.Infof("Running %s...", constants.EndScale)
+			if err = scale.UpdateCapacity(0); err != nil {
+				return sendResponse(err)
+			}
+			return sendResponse(cwevents.DeleteRule(body.Event.Name))
+
 		}
 		return sendResponse(errors.New("unknown or missing function"))
 	}

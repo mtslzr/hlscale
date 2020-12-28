@@ -65,8 +65,10 @@ data "aws_iam_policy_document" "lambda" {
   statement {
     effect = "Allow"
     actions = [
+      "events:DeleteRule",
       "events:PutRule",
-      "events:PutTargets"
+      "events:PutTargets",
+      "events:RemoveTargets"
     ]
     resources = ["*"]
   }
@@ -77,6 +79,15 @@ data "aws_iam_policy_document" "lambda" {
     ]
     resources = [
       "arn:aws:iam::645714156459:role/${local.project_name}-cwevents"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "autoscaling:SetDesiredCapacity"
+    ]
+    resources = [
+      "arn:aws:autoscaling:us-east-1:645714156459:autoScalingGroup:f44d694e-90fe-4b71-b3c6-ac7693014a7d:autoScalingGroupName/${local.project_name}-asg"
     ]
   }
 }
